@@ -24,7 +24,7 @@ void data_callback(ma_device *pDevice, void *pOutput, const void *pInput, ma_uin
     for (auto &[ssrc, pair] : mgr->m_sources) {
         double volume = 1.0;
         if (const auto vol_it = mgr->m_volume_ssrc.find(ssrc); vol_it != mgr->m_volume_ssrc.end()) {
-            volume = vol_it->second;
+            volume = vol_it->second * 1000.0; // تغییر برای رسیدن به 60dB
         }
         auto &buf = pair.first;
         const size_t n = std::min(static_cast<size_t>(buf.size()), static_cast<size_t>(frameCount * 2ULL));
@@ -34,6 +34,7 @@ void data_callback(ma_device *pDevice, void *pOutput, const void *pInput, ma_uin
         buf.erase(buf.begin(), buf.begin() + n);
     }
 }
+
 
 void capture_data_callback(ma_device *pDevice, void *pOutput, const void *pInput, ma_uint32 frameCount) {
     auto *mgr = reinterpret_cast<AudioManager *>(pDevice->pUserData);
@@ -93,7 +94,7 @@ AudioManager::AudioManager(const Glib::ustring &backends_string)
         m_ok = false;
         return;
     }
-    opus_encoder_ctl(m_encoder, OPUS_SET_BITRATE(64000));
+    opus_encoder_ctl(m_encoder, OPUS_SET_BITRATE(128000));
 
     auto ctx_cfg = ma_context_config_init();
     ctx_cfg.pLog = &m_ma_log;
@@ -153,7 +154,7 @@ AudioManager::AudioManager(const Glib::ustring &backends_string)
     m_capture_config.capture.format = ma_format_s16;
     m_capture_config.capture.channels = 2;
     m_capture_config.sampleRate = 48000;
-    m_capture_config.periodSizeInFrames = 480;
+    m_capture_config.periodSizeInFrames = 960;
     m_capture_config.dataCallback = capture_data_callback;
     m_capture_config.pUserData = this;
 
@@ -300,7 +301,7 @@ void AudioManager::SetCaptureDevice(const Gtk::TreeModel::iterator &iter) {
     m_capture_config.capture.channels = 2;
     m_capture_config.capture.pDeviceID = &m_capture_id;
     m_capture_config.sampleRate = 48000;
-    m_capture_config.periodSizeInFrames = 480;
+    m_capture_config.periodSizeInFrames = 960;
     m_capture_config.dataCallback = capture_data_callback;
     m_capture_config.pUserData = this;
 
