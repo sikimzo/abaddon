@@ -1,6 +1,6 @@
 name: Abaddon CI
 
-on: ["master"]
+on: [ push, pull_request ]
 
 jobs:
   msys2:
