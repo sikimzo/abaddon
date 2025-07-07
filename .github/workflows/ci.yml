@@ -1,6 +1,6 @@
 name: Abaddon CI
 
-on: [ master ]
+on: ["master"]
 
 jobs:
   msys2:
